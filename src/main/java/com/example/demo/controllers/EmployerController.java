@@ -1,32 +1,50 @@
 package com.example.demo.controllers;
 
+import jakarta.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.models.Employer;
 import com.example.demo.services.EmployerService;
+import com.example.demo.response.CustomResponse;
 
 @RestController
-@RequestMapping(path = "/")
+@RequestMapping(path = "/api/v1/employers")
+@Validated
 public class EmployerController {
+    @Autowired
     private EmployerService employerService;
 
-    @GetMapping("/users/{id}")
-    public Employer getUserById(@PathVariable Long id) {
+    // create employer
+    @PostMapping("")
+    public ResponseEntity<CustomResponse> createEmployer(@Valid @RequestBody Employer employer) {
+            return employerService.createEmployer(employer);
+    }
+
+    // get all employers
+    @GetMapping("")
+    public ResponseEntity<CustomResponse> getAllEmployer() {
+        return employerService.getAllEmployers();
+    }
+
+    // get employer by Id
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomResponse> getUserById(@PathVariable Long id) {
         return employerService.getEmployerById(id);
     }
 
-    @PostMapping("/users")
-    public Employer createUser(@RequestBody Employer user) {
-        return employerService.createEmployer(user);
-    }
-
-    @PutMapping("/users/{id}")
-    public Employer updateEmployer(@PathVariable Long id, @RequestBody Employer employer){
+    // update employer
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomResponse> updateEmployer(@PathVariable Long id, @RequestBody Employer employer) {
         return employerService.updateEmployer(id, employer);
     }
 
-//    @DeleteMapping("/users/{id}")
-//    public Employer deleteEmployer(@PathVariable Long id){
-//        employerService.deleteEmployer(id);
-//    }
+    // delete employer
+    @DeleteMapping("/{id}")
+    public ResponseEntity<CustomResponse> deleteEmployer(@PathVariable Long id) {
+        return employerService.deleteEmployer(id);
+    }
 }
