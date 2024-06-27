@@ -1,10 +1,5 @@
 package com.example.demo.response;
 
-import com.example.demo.models.Employer;
-
-import java.util.Optional;
-
-// Generic class
 public class CustomResponse {
     private int errorCode;
     private int statusCode;

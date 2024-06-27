@@ -1,17 +1,19 @@
 package com.example.demo.services;
 
+import com.example.demo.repositories.EmployerProjection;
 import com.example.demo.response.CustomResponse;
+import com.example.demo.models.Employer;
+import com.example.demo.repositories.EmployerRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
-import com.example.demo.models.Employer;
-import com.example.demo.repositories.EmployerRepository;
 
 @Service
 public class EmployerService {
@@ -56,20 +58,28 @@ public class EmployerService {
 
     // get employer by id
     public ResponseEntity<CustomResponse> getEmployerById(Long id) {
-        Optional<Employer> employer = employerRepository.findById(id);
-        return employer.isPresent() ? ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(0, HttpStatus.OK.value(), "Get employer by Id successful", employer)) : ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomResponse(1, HttpStatus.NOT_FOUND.value(), "Employer not found: id = " + id, ""));
+        Optional<EmployerProjection> employer = employerRepository.findEmployerById(id);
+        return employer.isPresent() ?
+                ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(0, HttpStatus.OK.value(), "Get employer by Id successful", employer))
+                : ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CustomResponse(1, HttpStatus.NOT_FOUND.value(), "Employer not found: id = " + id, ""));
+        // missing provinceName in data response
     }
 
     // get employer list
-    public ResponseEntity<CustomResponse> getAllEmployers() {
-        List<Employer> employerList = employerRepository.findAll();
-        return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(0, HttpStatus.OK.value(), "Get employerlist successful", employerList));
+    public ResponseEntity<CustomResponse> getAllEmployers(Pageable pageable) {
+        Page<EmployerProjection> employerList = employerRepository.findAllEmployerByOrderByName(pageable);
+
+        List<EmployerProjection> data = employerList.getContent();
+        return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(0, HttpStatus.OK.value(), "Get employerlist successful", data));
+
+        // did not format response as required
+        // missing provinceName in data response
     }
 
     // delete employer
     public ResponseEntity<CustomResponse> deleteEmployer(Long id) {
         boolean exists = employerRepository.existsById(id);
-        if(exists){
+        if (exists) {
             employerRepository.deleteById(id);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new CustomResponse(0, HttpStatus.OK.value(), "Delete employer successful", ""));

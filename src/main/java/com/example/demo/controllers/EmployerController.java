@@ -3,6 +3,8 @@ package com.example.demo.controllers;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +28,11 @@ public class EmployerController {
 
     // get all employers
     @GetMapping("")
-    public ResponseEntity<CustomResponse> getAllEmployer() {
-        return employerService.getAllEmployers();
+    public ResponseEntity<CustomResponse> getAllEmployer(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return employerService.getAllEmployers(pageable);
     }
 
     // get employer by Id
