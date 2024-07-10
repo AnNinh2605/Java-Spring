@@ -1,4 +1,4 @@
-package com.example.demo.controllers.advice;
+package vn.unigap.api.controller.advice;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.example.demo.response.CustomResponse;
+import vn.unigap.api.dto.out.CustomResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
