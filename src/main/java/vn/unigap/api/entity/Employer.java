@@ -1,9 +1,6 @@
 package vn.unigap.api.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,7 +10,7 @@ import java.time.LocalDateTime;
 @Table(name = "employer")
 public class Employer {
     @Id
-    @Column
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "email")
@@ -111,4 +108,16 @@ public class Employer {
 
     @Column(name = "data_search")
     private String dataSearch;
+
+    // PrePersist and PreUpdate methods to set the created_at and updated_at fields
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

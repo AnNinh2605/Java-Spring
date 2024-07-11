@@ -1,6 +1,9 @@
 package vn.unigap.api.controller;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -20,15 +23,13 @@ import vn.unigap.api.service.EmployerService;
 
 @RestController
 @RequestMapping(path = "/api/v1/employers")
+@RequiredArgsConstructor()
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Validated
 @Slf4j
 public class EmployerController {
     // Constructor Injection
-    private final EmployerService employerService;
-
-    public EmployerController(EmployerService employerService) {
-        this.employerService = employerService;
-    }
+    EmployerService employerService;
 
     // create employer
     @PostMapping("")
@@ -39,9 +40,11 @@ public class EmployerController {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new CustomResponse<>(0, HttpStatus.CREATED.value(), responseService, ""));
         } catch (DuplicateKeyException e) {
+            log.error("An error occurred at controller", e);
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new CustomResponse<>(2, HttpStatus.CONFLICT.value(), e.getMessage(), ""));
         } catch (Exception e) {
+            log.error("An error occurred at service", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new CustomResponse<>(5, HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ""));
         }
@@ -52,8 +55,10 @@ public class EmployerController {
     public ResponseEntity<?> getAllEmployer(@Valid @ModelAttribute PaginateEmployerDtoIn paginateEmployerDtoIn) {
         try {
             PaginationResponse responseService = employerService.getAllEmployers(paginateEmployerDtoIn);
-            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse<>(0, HttpStatus.OK.value(), "Get " +
-                    "employer list successfully", responseService));
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new CustomResponse<>(0, HttpStatus.OK.value(), "Get " +
+                            "employer list successfully", responseService));
         } catch (Exception e) {
             log.info("An error occurred at controller", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -63,16 +68,18 @@ public class EmployerController {
 
     // get employer by Id
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUserById(@Valid @ModelAttribute IdEmployerDtoIn id) {
+    public ResponseEntity<?> getUserById(@PathVariable Long id) {
         try {
             Object responseService = employerService.getEmployerById(id);
 
             return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse<>(0, HttpStatus.OK.value(), "Get " +
                     "employer by Id successful", responseService));
         } catch (EntityNotFoundException e) {
+            log.error("An error occurred at controller", e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new CustomResponse<>(1, HttpStatus.NOT_FOUND.value(), e.getMessage(), ""));
         } catch (Exception e) {
+            log.error("An error occurred at controller", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new CustomResponse<>(5, HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ""));
         }
@@ -80,16 +87,19 @@ public class EmployerController {
 
     // update employer
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEmployer(@Valid @ModelAttribute IdEmployerDtoIn id,
-                                                         @Valid @RequestBody UpdateEmployerDtoIn employer) {
+    public ResponseEntity<?> updateEmployer(@PathVariable Long id,
+                                            @Valid @RequestBody UpdateEmployerDtoIn employer) {
         try {
             String responseService = employerService.updateEmployer(id, employer);
+
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new CustomResponse<>(0, HttpStatus.OK.value(), responseService, ""));
         } catch (EntityNotFoundException e) {
+            log.error("check not found " + e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new CustomResponse<>(1, HttpStatus.NOT_FOUND.value(), e.getMessage(), ""));
         } catch (Exception e) {
+            log.error("An error occurred at controller", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new CustomResponse<>(5, HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ""));
         }
@@ -97,15 +107,18 @@ public class EmployerController {
 
     // delete employer
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteEmployer(@Valid @ModelAttribute IdEmployerDtoIn id) {
+    public ResponseEntity<?> deleteEmployer(@PathVariable Long id) {
         try {
             String responseService = employerService.deleteEmployer(id);
+
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new CustomResponse<>(0, HttpStatus.OK.value(), responseService, ""));
         } catch (EntityNotFoundException e) {
+            log.error("check not found " + e);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new CustomResponse<>(1, HttpStatus.NOT_FOUND.value(), e.getMessage(), ""));
         } catch (Exception e) {
+            log.error("An error occurred at controller", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new CustomResponse<>(5, HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), ""));
         }

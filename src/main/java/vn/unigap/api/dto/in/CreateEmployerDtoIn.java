@@ -20,4 +20,6 @@ public class CreateEmployerDtoIn {
     @NotNull(message = "Please provide province")
     @Min(value = 1, message = "Invalid provinceId")
     Integer provinceId;
+
+    String description;
 }

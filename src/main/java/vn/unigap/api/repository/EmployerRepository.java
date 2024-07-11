@@ -10,6 +10,6 @@ import vn.unigap.api.entity.Employer;
 public interface EmployerRepository extends JpaRepository<Employer, Long> {
     boolean existsByEmail(String email);
 
-    Optional<EmployerProjection> findEmployerById(Long id);
+    Optional<GetEmployerByIdProjection> findEmployerById(Long id);
 }
 
