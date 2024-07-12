@@ -55,10 +55,11 @@ public class EmployerControllerTest {
     @Test
     void createEmployer_validRequest_success() throws Exception {
         // given
+        // convert data from java object to json string
         ObjectMapper objectMapper = new ObjectMapper();
         String content = objectMapper.writeValueAsString(requestData);
 
-        // convert data from java object to json string
+        // mock to employerService.createEmployer
         Mockito.when(employerService.createEmployer(ArgumentMatchers.any()))
                 .thenReturn(String.valueOf(customResponse));
 
@@ -69,6 +70,26 @@ public class EmployerControllerTest {
                         .content(content))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("errorCode").value(0));
+
+        // then
+    }
+
+    @Test
+    void createEmployer_usernameInvalid_fail() throws Exception {
+        // given
+        requestData.setName("   ");
+        // convert data from java object to json string
+        ObjectMapper objectMapper = new ObjectMapper();
+        String content = objectMapper.writeValueAsString(requestData);
+
+        // when
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/employers")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("errorCode").value(3))
+                .andExpect(MockMvcResultMatchers.jsonPath("message").value("Please provide name"));
 
         // then
     }

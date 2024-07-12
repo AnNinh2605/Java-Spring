@@ -13,13 +13,10 @@ import vn.unigap.api.dto.in.PaginateEmployerDtoIn;
 import vn.unigap.api.dto.in.UpdateEmployerDtoIn;
 import vn.unigap.api.dto.out.PaginationResponse;
 import vn.unigap.api.entity.Employer;
-import vn.unigap.api.repository.EmployerProjection;
+import vn.unigap.api.repository.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import vn.unigap.api.repository.EmployerRepository;
-import vn.unigap.api.repository.EmployerRepositoryPage;
-import vn.unigap.api.repository.GetEmployerByIdProjection;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +28,7 @@ import java.util.Optional;
 public class EmployerService {
     // Constructor Injection
     EmployerRepository employerRepository;
+    JobProvinceRepository jobProvinceRepository;
     EmployerRepositoryPage employerRepositoryPage;
 
     private Employer convertToEntity(CreateEmployerDtoIn dtoIn) {
@@ -45,6 +43,7 @@ public class EmployerService {
     // create employer
     public String createEmployer(CreateEmployerDtoIn employer) {
         String email = employer.getEmail();
+        int provinceId = employer.getProvinceId();
 
         try {
             // check exist email
@@ -53,17 +52,17 @@ public class EmployerService {
             }
 
             // check exist provinceId
+            jobProvinceRepository.findById(provinceId)
+                    .orElseThrow(() -> new EntityNotFoundException("Province not found"));
 
             // create employer
             Employer createData = convertToEntity(employer);
             employerRepository.save(createData);
 
             return "Create employer successful";
-        } catch (DuplicateKeyException e) {
-            log.error("An error occurred at service", e);
+        } catch (EntityNotFoundException | DuplicateKeyException e) {
             throw e;
         } catch (Exception e) {
-            log.error("An error occurred at service", e);
             throw new RuntimeException("Failed to create employer", e);
         }
     }
@@ -71,7 +70,7 @@ public class EmployerService {
     // update employer
     public String updateEmployer(Long id, UpdateEmployerDtoIn employerDetails) {
         String name = employerDetails.getName();
-        int province = employerDetails.getProvinceId();
+        int provinceId = employerDetails.getProvinceId();
         String description = employerDetails.getDescription();
 
         try {
@@ -81,21 +80,21 @@ public class EmployerService {
                 throw new EntityNotFoundException("Employer not found " + id);
             }
 
-            // check existing provinceId
+            // check exist provinceId
+            jobProvinceRepository.findById(provinceId)
+                    .orElseThrow(() -> new EntityNotFoundException("Province not found"));
 
             // update employer
             Employer updateData = findEmployer.get();
             updateData.setName(name);
-            updateData.setProvince(province);
+            updateData.setProvince(provinceId);
             updateData.setDescription(description);
 
             employerRepository.save(updateData);
             return "Update employer successful";
         } catch (EntityNotFoundException e) {
-            log.error("An error occurred at service", e);
             throw e;
         } catch (Exception e) {
-            log.error("An error occurred at service", e);
             throw new RuntimeException("Failed to update employer", e);
         }
     }

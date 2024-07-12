@@ -2,11 +2,13 @@ package vn.unigap.api.dto.in;
 
 import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class CreateEmployerDtoIn {
     @NotBlank(message = "Please provide email address")
     @Email(message = "Please provide valid email address")

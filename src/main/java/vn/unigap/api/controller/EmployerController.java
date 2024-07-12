@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import vn.unigap.api.dto.in.CreateEmployerDtoIn;
-import vn.unigap.api.dto.in.IdEmployerDtoIn;
 import vn.unigap.api.dto.in.PaginateEmployerDtoIn;
 import vn.unigap.api.dto.in.UpdateEmployerDtoIn;
 import vn.unigap.api.dto.out.CustomResponse;
@@ -32,13 +31,16 @@ public class EmployerController {
     EmployerService employerService;
 
     // create employer
-    @PostMapping("")
+    @PostMapping
     public ResponseEntity<?> createEmployer(@Valid @RequestBody CreateEmployerDtoIn employer) {
         try {
             String responseService = employerService.createEmployer(employer);
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new CustomResponse<>(0, HttpStatus.CREATED.value(), responseService, ""));
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new CustomResponse<>(1, HttpStatus.NOT_FOUND.value(), e.getMessage(), ""));
         } catch (DuplicateKeyException e) {
             log.error("An error occurred at controller", e);
             return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -51,7 +53,7 @@ public class EmployerController {
     }
 
     // get all employers
-    @GetMapping("")
+    @GetMapping
     public ResponseEntity<?> getAllEmployer(@Valid @ModelAttribute PaginateEmployerDtoIn paginateEmployerDtoIn) {
         try {
             PaginationResponse responseService = employerService.getAllEmployers(paginateEmployerDtoIn);

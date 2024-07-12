@@ -12,12 +12,13 @@ import vn.unigap.api.dto.out.CustomResponse;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<CustomResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
         FieldError errors = ex.getBindingResult().getFieldError();
         assert errors != null;
         String errorMessage = errors.getDefaultMessage();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomResponse(3, HttpStatus.BAD_REQUEST.value(), errorMessage, ""));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CustomResponse<>(3,
+                HttpStatus.BAD_REQUEST.value(), errorMessage, ""));
     }
 
 //    @ExceptionHandler(MethodArgumentNotValidException.class)
