@@ -45,26 +45,21 @@ public class EmployerService {
         String email = employer.getEmail();
         int provinceId = employer.getProvinceId();
 
-        try {
-            // check exist email
-            if (employerRepository.existsByEmail(email)) {
-                throw new DuplicateKeyException("Email already exists: " + email);
-            }
-
-            // check exist provinceId
-            jobProvinceRepository.findById(provinceId)
-                    .orElseThrow(() -> new EntityNotFoundException("Province not found"));
-
-            // create employer
-            Employer createData = convertToEntity(employer);
-            employerRepository.save(createData);
-
-            return "Create employer successful";
-        } catch (EntityNotFoundException | DuplicateKeyException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create employer", e);
+        // check exist email
+        if (employerRepository.existsByEmail(email)) {
+            throw new DuplicateKeyException("Email already exists: " + email);
         }
+
+        // check exist provinceId
+        jobProvinceRepository.findById(provinceId)
+                .orElseThrow(() -> new EntityNotFoundException("Province not found"));
+
+        // create employer
+        Employer createData = convertToEntity(employer);
+        employerRepository.save(createData);
+
+        log.info("Employer created successfully with email: {}", email);
+        return "Create employer successful";
     }
 
     // update employer
@@ -73,87 +68,61 @@ public class EmployerService {
         int provinceId = employerDetails.getProvinceId();
         String description = employerDetails.getDescription();
 
-        try {
-            // find employer
-            Optional<Employer> findEmployer = employerRepository.findById(id);
-            if (findEmployer.isEmpty()) {
-                throw new EntityNotFoundException("Employer not found " + id);
-            }
-
-            // check exist provinceId
-            jobProvinceRepository.findById(provinceId)
-                    .orElseThrow(() -> new EntityNotFoundException("Province not found"));
-
-            // update employer
-            Employer updateData = findEmployer.get();
-            updateData.setName(name);
-            updateData.setProvince(provinceId);
-            updateData.setDescription(description);
-
-            employerRepository.save(updateData);
-            return "Update employer successful";
-        } catch (EntityNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to update employer", e);
+        // find employer
+        Optional<Employer> findEmployer = employerRepository.findById(id);
+        if (findEmployer.isEmpty()) {
+            throw new EntityNotFoundException("Employer not found " + id);
         }
+
+        // check exist provinceId
+        jobProvinceRepository.findById(provinceId)
+                .orElseThrow(() -> new EntityNotFoundException("Province not found"));
+
+        // update employer
+        Employer updateData = findEmployer.get();
+        updateData.setName(name);
+        updateData.setProvince(provinceId);
+        updateData.setDescription(description);
+
+        employerRepository.save(updateData);
+        return "Update employer successful";
     }
 
     // get employer by id
     public Optional<GetEmployerByIdProjection> getEmployerById(Long id) {
-        try {
-            Optional<GetEmployerByIdProjection> employer = employerRepository.findEmployerById(id);
-            if (employer.isEmpty()) {
-                throw new EntityNotFoundException("Employer not found id = " + id);
-            }
-            // missing provinceName in data response
-            return employer;
-        } catch (EntityNotFoundException e) {
-            log.error("An error occurred at service", e);
-            throw e;
-        } catch (Exception e) {
-            log.info("An error occurred at service", e);
-            throw new RuntimeException("Failed to get employer by id", e);
+        Optional<GetEmployerByIdProjection> employer = employerRepository.findEmployerById(id);
+
+        if (employer.isEmpty()) {
+            throw new EntityNotFoundException("Employer not found id = " + id);
         }
+        // missing provinceName in data response
+        return employer;
     }
 
     // get employer list
     public PaginationResponse getAllEmployers(PaginateEmployerDtoIn paginateEmployerDtoIn) {
         Pageable pageable = PageRequest.of(paginateEmployerDtoIn.getPage() - 1, paginateEmployerDtoIn.getPageSize());
-        try {
 
-            Page<EmployerProjection> employerList = employerRepositoryPage.findAllEmployerByOrderByName(pageable);
+        Page<EmployerProjection> employerList = employerRepositoryPage.findAllEmployerByOrderByName(pageable);
 
-            List<EmployerProjection> data = employerList.getContent();
-            int page = employerList.getNumber();
-            int pageSize = employerList.getSize();
-            long totalElements = employerList.getTotalElements();
-            long totalPages = employerList.getTotalPages();
+        List<EmployerProjection> data = employerList.getContent();
+        int page = employerList.getNumber();
+        int pageSize = employerList.getSize();
+        long totalElements = employerList.getTotalElements();
+        long totalPages = employerList.getTotalPages();
 
-            // missing provinceName in data response
-            return new PaginationResponse(page, pageSize, totalElements, totalPages, data);
-        } catch (Exception e) {
-            log.info("An error occurred at service", e);
-            throw new RuntimeException("Failed to get employer list", e);
-        }
+        // missing provinceName in data response
+        return new PaginationResponse(page, pageSize, totalElements, totalPages, data);
     }
 
     // delete employer
     public String deleteEmployer(Long id) {
-        try {
-            boolean exists = employerRepository.existsById(id);
-            if (!exists) {
-                throw new EntityNotFoundException("Not found employer " + id);
-            }
-
-            employerRepository.deleteById(id);
-            return "Delete employer successful";
-        } catch (EntityNotFoundException e) {
-            log.error("An error occurred at service", e);
-            throw e;
-        } catch (Exception e) {
-            log.info("An error occurred at service", e);
-            throw new RuntimeException("Failed to delete employer", e);
+        boolean exists = employerRepository.existsById(id);
+        if (!exists) {
+            throw new EntityNotFoundException("Not found employer " + id);
         }
+
+        employerRepository.deleteById(id);
+        return "Delete employer successful";
     }
 }
